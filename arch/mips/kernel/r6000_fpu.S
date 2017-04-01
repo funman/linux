@@ -18,6 +18,8 @@
 
 	.set	noreorder
 	.set	mips2
+	.set push
+	SET_HARDFLOAT
 	/* Save floating point context */
 	LEAF(_save_fp_context)
 	mfc0	t0,CP0_STATUS
@@ -48,6 +50,7 @@
 1:	jr	ra
 	 nop
 	END(_save_fp_context)
+	.set pop
 
 /* Restore FPU state:
  *  - fp gp registers
