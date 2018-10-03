@@ -43,6 +43,7 @@
  * task_struct *resume(task_struct *prev, task_struct *next,
  *                     struct thread_info *next_ti)
  */
+    .set hardfloat
 	.align	5
 	LEAF(resume)
 	mfc0	t1, CP0_STATUS
