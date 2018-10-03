@@ -295,9 +295,8 @@ if [ ! -z ${output_file} ]; then
 		cat ${cpio_tfile} > ${output_file}
 	else
 		if [ "${compr}" = "lzma_alone" ]; then
-			cross_compile_path=`echo ${CONFIG_CROSS_COMPILER_PATH} | sed -e 's/\"//g'`
-			${cross_compile_path}/lzma_alone e ${cpio_tfile} ${output_file} -d20
-			echo "$cross_compile_path/lzma_alone e $cpio_tfile $output_file -d20"
+			lzma -c ${cpio_tfile} > ${output_file}
+			echo "lzma -c $cpio_tfile > $output_file"
 		else
 			echo "============$compr=============="
 			(cat ${cpio_tfile} | ${compr}  - > ${output_file}) \
