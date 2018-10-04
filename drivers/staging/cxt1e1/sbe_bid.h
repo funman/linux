@@ -1,5 +1,5 @@
 /*
- * $Id: sbe_bid.h,v 1.0 2005/09/28 00:10:09 rickd PMCC4_3_1B $
+ * $Id: sbe_bid.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_SBEBID_H_
@@ -25,11 +25,14 @@
  *
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.0 $
- * Last changed on $Date: 2005/09/28 00:10:09 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2011-04-07 11:33:22 $
+ * Changed by $Author: bruce $
  *-----------------------------------------------------------------------------
  * $Log: sbe_bid.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.0  2005/09/28 00:10:09  rickd
  * Initial revision
  *

@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 #ifndef __LINUX_IP_NETFILTER_H
 #define __LINUX_IP_NETFILTER_H
 
@@ -36,6 +37,8 @@
 #define NFC_IP_DST_PT		0x0400
 /* Something else about the proto */
 #define NFC_IP_PROTO_UNKNOWN	0x2000
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+#endif /* ! __KERNEL__ */
 
 /* IP Hooks */
 /* After promisc drops, checksum checks. */
@@ -49,7 +52,6 @@
 /* Packets about to hit the wire. */
 #define NF_IP_POST_ROUTING	4
 #define NF_IP_NUMHOOKS		5
-#endif /* ! __KERNEL__ */
 
 enum nf_ip_hook_priorities {
 	NF_IP_PRI_FIRST = INT_MIN,

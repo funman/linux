@@ -1,5 +1,5 @@
 /*
- * $Id: pmcc4.h,v 1.4 2005/11/01 19:24:48 rickd PMCC4_3_1B $
+ * $Id: pmcc4.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_PMCC4_H_
@@ -24,11 +24,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.4 $
- * Last changed on $Date: 2005/11/01 19:24:48 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2011-04-07 11:33:22 $
+ * Changed by $Author: bruce $
  *-----------------------------------------------------------------------------
  * $Log: pmcc4.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.4  2005/11/01 19:24:48  rickd
  * Remove de-implement function prototypes.  Several <int> to
  * <status_t> changes for consistant usage of same.

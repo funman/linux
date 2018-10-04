@@ -8,7 +8,7 @@
  *     last modfied: Mon Apr 11 16:12:16 2005
  * 
  *   by /n/asic/design/tools/rdesc/src/rdes2c --outfile marb_defs.h ../../inst/memarb/rtl/guinness/marb_top.r
- *      id: $Id: marb_defs.h,v 1.1 2007/02/13 11:55:30 starvik Exp $
+ *      id: $Id: marb_defs.h,v 1.1.1.1 2011-04-07 11:33:32 bruce Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-
@@ -267,7 +267,7 @@ enum {
  *     last modfied: Mon Apr 11 16:12:16 2005
  * 
  *   by /n/asic/design/tools/rdesc/src/rdes2c --outfile marb_defs.h ../../inst/memarb/rtl/guinness/marb_top.r
- *      id: $Id: marb_defs.h,v 1.1 2007/02/13 11:55:30 starvik Exp $
+ *      id: $Id: marb_defs.h,v 1.1.1.1 2011-04-07 11:33:32 bruce Exp $
  * Any changes here will be lost.
  *
  * -*- buffer-read-only: t -*-

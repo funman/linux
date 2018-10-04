@@ -34,6 +34,8 @@ obj-$(CONFIG_ENIC) += enic/
 obj-$(CONFIG_JME) += jme.o
 obj-$(CONFIG_BE2NET) += benet/
 obj-$(CONFIG_VMXNET3) += vmxnet3/
+obj-$(CONFIG_RALINK_RDM) += rt_rdm/
+obj-$(CONFIG_RAETH) += raeth/
 
 gianfar_driver-objs := gianfar.o \
 		gianfar_ethtool.o \
@@ -154,6 +156,8 @@ obj-$(CONFIG_QLA3XXX) += qla3xxx.o
 obj-$(CONFIG_QLCNIC) += qlcnic/
 obj-$(CONFIG_QLGE) += qlge/
 
+obj-$(CONFIG_TITAN_GE) += titan_mdio.o titan_ge.o
+
 obj-$(CONFIG_PPP) += ppp_generic.o
 obj-$(CONFIG_PPP_ASYNC) += ppp_async.o
 obj-$(CONFIG_PPP_SYNC_TTY) += ppp_synctty.o
@@ -162,6 +166,7 @@ obj-$(CONFIG_PPP_BSDCOMP) += bsd_comp.o
 obj-$(CONFIG_PPP_MPPE) += ppp_mppe.o
 obj-$(CONFIG_PPPOE) += pppox.o pppoe.o
 obj-$(CONFIG_PPPOL2TP) += pppox.o
+obj-$(CONFIG_PPPOPPTP) += pppox.o pptp.o
 
 obj-$(CONFIG_SLIP) += slip.o
 obj-$(CONFIG_SLHC) += slhc.o

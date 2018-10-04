@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	Linux ethernet bridge
  *
@@ -206,6 +207,9 @@ struct net_bridge
 
 	unsigned char			topology_change;
 	unsigned char			topology_change_detected;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	unsigned char			bridge_loop_detected; //Joan.Huang add for bridge loop detected
+	unsigned char			local_topology_change; //Joan.Huang add for bridge loop detected	
 
 #ifdef CONFIG_BRIDGE_IGMP_SNOOPING
 	unsigned char			multicast_router;

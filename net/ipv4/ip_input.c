@@ -145,6 +145,10 @@
 #include <linux/mroute.h>
 #include <linux/netlink.h>
 
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#endif
+
 /*
  *	Process Router Attention IP option (RFC 2113)
  */
@@ -260,6 +264,15 @@ int ip_local_deliver(struct sk_buff *skb)
 		if (ip_defrag(skb, IP_DEFRAG_LOCAL_DELIVER))
 			return 0;
 	}
+
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+        if( IS_SPACE_AVAILABLED(skb) &&
+                ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
+                 (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN) ||
+                 (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE))){
+            FOE_ALG(skb)=1;
+        }
+#endif
 
 	return NF_HOOK(NFPROTO_IPV4, NF_INET_LOCAL_IN, skb, skb->dev, NULL,
 		       ip_local_deliver_finish);

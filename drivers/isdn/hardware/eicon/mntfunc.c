@@ -1,4 +1,4 @@
-/* $Id: mntfunc.c,v 1.19.6.4 2005/01/31 12:22:20 armin Exp $
+/* $Id: mntfunc.c,v 1.1.1.1 2011-04-07 11:33:19 bruce Exp $
  *
  * Driver for Eicon DIVA Server ISDN cards.
  * Maint module

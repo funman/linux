@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * H.323 connection tracking helper
  *
@@ -270,7 +271,15 @@ static int expect_rtp_rtcp(struct sk_buff *skb, struct nf_conn *ct,
 		return 0;
 
 	/* RTP port is even */
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	//2010.06.10 Joan.Huang modify fix DUT some time fail on CDRouter test case cdrouter_app_207
+	//Fail on RTP port is odd number pass on RTP port is even number.
+	//The original calculation is not good it will result in H.245 server mistake.
+	/*
 	port &= htons(~1);
+	rtp_port = port;
+	rtcp_port = htons(ntohs(port) + 1);
+	*/
 	rtp_port = port;
 	rtcp_port = htons(ntohs(port) + 1);
 

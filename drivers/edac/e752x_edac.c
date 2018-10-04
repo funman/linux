@@ -13,7 +13,7 @@
  * 	Wang Zhenyu at intel.com
  * 	Dave Jiang at mvista.com
  *
- * $Id: edac_e752x.c,v 1.5.2.11 2005/10/05 00:43:44 dsp_llnl Exp $
+ * $Id: e752x_edac.c,v 1.1.1.1 2011-04-07 11:33:18 bruce Exp $
  *
  */
 

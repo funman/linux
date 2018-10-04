@@ -11,6 +11,9 @@
  *  2 of the License, or (at your option) any later version.
  *   
  *  $Log: pc300_tty.c,v $
+ *  Revision 1.1.1.1  2011-04-07 11:33:17  bruce
+ *  BBU linux 2.6.36 source without modification
+ *
  *  Revision 3.7  2002/03/07 14:17:09  henrique
  *  License data fixed
  *

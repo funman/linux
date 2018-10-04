@@ -104,6 +104,9 @@
  
 /*
  * $Log: t128.c,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:21  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  */
 
 #include <asm/system.h>

@@ -29,6 +29,9 @@
 
 /*
  * $Log: eql.c,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:17  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.2  1996/04/11 17:51:52  guru
  * Added one-line eql_remove_slave patch.
  *

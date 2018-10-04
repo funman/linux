@@ -34,7 +34,7 @@ GNU General Public License for more details.
 This section contains comments describing changes made to this file.
 Notice that changes are listed in reverse chronological order.
 
-$Header: //source/qcom/qct/multimedia2/AdspSvc/7XXX/qdsp5cmd/video/qdsp5vfecmdi.h#2 $ $DateTime: 2008/07/30 10:50:23 $ $Author: pavanr $
+$Header: /home/cvsroot/RT288x_SDK/source/linux-2.6.36MT.x/drivers/staging/dream/include/mach/qdsp5/qdsp5vfecmdi.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $ $DateTime: 2008/07/30 10:50:23 $ $Author: bruce $
 Revision History:
 
 when       who     what, where, why

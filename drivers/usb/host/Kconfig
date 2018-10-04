@@ -59,6 +59,11 @@ config USB_EHCI_HCD
 	  To compile this driver as a module, choose M here: the
 	  module will be called ehci-hcd.
 
+config RT3XXX_EHCI
+	bool "Ralink EHCI HCD support"
+	depends on USB_EHCI_HCD
+	default y
+
 config USB_EHCI_ROOT_HUB_TT
 	bool "Root Hub Transaction Translators"
 	depends on USB_EHCI_HCD
@@ -209,6 +214,11 @@ config USB_OHCI_HCD
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called ohci-hcd.
+
+config RT3XXX_OHCI
+	bool "Ralink OHCI HCD support"
+	depends on USB_OHCI_HCD
+	default y
 
 config USB_OHCI_HCD_OMAP1
 	bool "OHCI support for OMAP1/2 chips"

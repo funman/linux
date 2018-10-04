@@ -1,4 +1,4 @@
-/* $Id: memcpy.S,v 1.3 2001/07/27 11:50:52 gniibe Exp $
+/* $Id: memcpy.S,v 1.1.1.1 2011-04-07 11:33:27 bruce Exp $
  *
  * "memcpy" implementation of SuperH
  *

@@ -1,3 +1,4 @@
+//Dec 6, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * This file is subject to the terms and conditions of the GNU General Public
  * License.  See the file "COPYING" in the main directory of this archive
@@ -63,6 +64,7 @@
 #define EXIT_CRITICAL(flags) local_irq_restore(flags)
 
 #endif /* CONFIG_MIPS_MT_SMTC */
+
 
 DEFINE_PER_CPU(struct mmu_gather, mmu_gathers);
 

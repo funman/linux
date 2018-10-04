@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	IPv6 over IPv4 tunnel device - Simple Internet Transition (SIT)
  *	Linux INET6 implementation
@@ -63,6 +64,8 @@
 #define HASH_SIZE  16
 #define HASH(addr) (((__force u32)addr^((__force u32)addr>>4))&0xF)
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+#define WAN_6RD_IFNAME "tun6rd"
 static void ipip6_tunnel_init(struct net_device *dev);
 static void ipip6_tunnel_setup(struct net_device *dev);
 
@@ -586,33 +589,36 @@ static inline
 __be32 try_6rd(struct in6_addr *v6dst, struct ip_tunnel *tunnel)
 {
 	__be32 dst = 0;
-
 #ifdef CONFIG_IPV6_SIT_6RD
-	if (ipv6_prefix_equal(v6dst, &tunnel->ip6rd.prefix,
-			      tunnel->ip6rd.prefixlen)) {
-		unsigned pbw0, pbi0;
-		int pbi1;
-		u32 d;
 
-		pbw0 = tunnel->ip6rd.prefixlen >> 5;
-		pbi0 = tunnel->ip6rd.prefixlen & 0x1f;
+		if (ipv6_prefix_equal(v6dst, &tunnel->ip6rd.prefix,
+				      tunnel->ip6rd.prefixlen)) {
+			unsigned pbw0, pbi0;
+			int pbi1;
+			u32 d;
 
-		d = (ntohl(v6dst->s6_addr32[pbw0]) << pbi0) >>
-		    tunnel->ip6rd.relay_prefixlen;
+			pbw0 = tunnel->ip6rd.prefixlen >> 5;
+			pbi0 = tunnel->ip6rd.prefixlen & 0x1f;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]			
+			d = (ntohl(v6dst->s6_addr32[pbw0]) << pbi0) >>  tunnel->ip6rd.relay_prefixlen;
+			pbi1 = pbi0 - tunnel->ip6rd.relay_prefixlen;
+			
+		
+			if (pbi1 > 0)
+				d |= ntohl(v6dst->s6_addr32[pbw0 + 1]) >>
+				     (32 - pbi1);
 
-		pbi1 = pbi0 - tunnel->ip6rd.relay_prefixlen;
-		if (pbi1 > 0)
-			d |= ntohl(v6dst->s6_addr32[pbw0 + 1]) >>
-			     (32 - pbi1);
+			dst = tunnel->ip6rd.relay_prefix | htonl(d);
 
-		dst = tunnel->ip6rd.relay_prefix | htonl(d);
-	}
+		}
 #else
-	if (v6dst->s6_addr16[0] == htons(0x2002)) {
-		/* 6to4 v6 addr has 16 bits prefix, 32 v4addr, 16 SLA, ... */
-		memcpy(&dst, &v6dst->s6_addr16[1], 4);
-	}
+
+		if (v6dst->s6_addr16[0] == htons(0x2002)) {
+			/* 6to4 v6 addr has 16 bits prefix, 32 v4addr, 16 SLA, ... */
+			memcpy(&dst, &v6dst->s6_addr16[1], 4);
+		}
 #endif
+
 	return dst;
 }
 

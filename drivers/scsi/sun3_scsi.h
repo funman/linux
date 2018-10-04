@@ -30,7 +30,10 @@
  */
 
 /*
- * $Log: cumana_NCR5380.h,v $
+ * $Log: sun3_scsi.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:21  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  */
 
 #ifndef SUN3_NCR5380_H

@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /* SIP extension for IP connection tracking.
  *
  * (C) 2005 by Christian Hentschel <chentschel@arnet.com.ar>
@@ -25,6 +26,13 @@
 #include <net/netfilter/nf_conntrack_helper.h>
 #include <net/netfilter/nf_conntrack_zones.h>
 #include <linux/netfilter/nf_conntrack_sip.h>
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+#if 0
+#define DEBUGP printk
+#else
+#define DEBUGP(format, args...)
+#endif
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Christian Hentschel <chentschel@arnet.com.ar>");
@@ -179,7 +187,8 @@ static int epaddr_len(const struct nf_conn *ct, const char *dptr,
 	const char *aux = dptr;
 
 	if (!parse_addr(ct, dptr, &dptr, &addr, limit)) {
-		pr_debug("ip: %s parse failed.!\n", dptr);
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+		DEBUGP("ip: %s parse failed.!\n", dptr);
 		return 0;
 	}
 
@@ -195,23 +204,23 @@ static int epaddr_len(const struct nf_conn *ct, const char *dptr,
 static int skp_epaddr_len(const struct nf_conn *ct, const char *dptr,
 			  const char *limit, int *shift)
 {
-	const char *start = dptr;
 	int s = *shift;
 
 	/* Search for @, but stop at the end of the line.
 	 * We are inside a sip: URI, so we don't need to worry about
 	 * continuation lines. */
-	while (dptr < limit &&
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	 
+	while (dptr <= limit &&
 	       *dptr != '@' && *dptr != '\r' && *dptr != '\n') {
 		(*shift)++;
 		dptr++;
 	}
 
-	if (dptr < limit && *dptr == '@') {
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	if (dptr <= limit && *dptr == '@') {
 		dptr++;
 		(*shift)++;
 	} else {
-		dptr = start;
 		*shift = s;
 	}
 

@@ -1,5 +1,5 @@
 # .gdbinit file
-# $Id$
+# $Id: dot.gdbinit.smp,v 1.1.1.1 2011-04-07 11:33:28 bruce Exp $
 
 # setting
 set width 0d70

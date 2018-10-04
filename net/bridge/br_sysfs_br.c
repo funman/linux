@@ -1,3 +1,4 @@
+//Oct 29, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	Sysfs attributes of bridge ports
  *	Linux ethernet bridge
@@ -20,6 +21,24 @@
 #include <linux/times.h>
 
 #include "br_private.h"
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+#include "br_umedia_redirect_url.h"
+#endif
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//+++Ricky Cao: Below is added for support predefined url
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+#include "br_umedia_predefine_url.h"
+#endif
+//---Ricky Cao: Above is added for support predefined url
+
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+extern unsigned char deny_manage_by_wlan;
+#endif
+//Ricky Cao added DONE
 
 #define to_dev(obj)	container_of(obj, struct device, kobj)
 #define to_bridge(cd)	((struct net_bridge *)netdev_priv(to_net_dev(cd)))
@@ -274,6 +293,54 @@ static ssize_t show_topology_change_timer(struct device *d,
 static DEVICE_ATTR(topology_change_timer, S_IRUGO, show_topology_change_timer,
 		   NULL);
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//Joan.Huang add start 
+// for bridge loop detected
+static ssize_t show_bridge_loop_detected(struct device *d,
+					  struct device_attribute *attr,
+					  char *buf)
+{
+	struct net_bridge *br = to_bridge(d);
+	return sprintf(buf, "%d\n", br->bridge_loop_detected);
+}
+
+static void set_bridge_loop_detected(struct net_bridge *br, unsigned long val)
+{
+	br->bridge_loop_detected = val;
+}
+
+static ssize_t store_bridge_loop_detected(struct device *d,
+			       struct device_attribute *attr, const char *buf,
+			       size_t len)
+{
+	return store_bridge_parm(d, buf, len, set_bridge_loop_detected);
+}
+
+static DEVICE_ATTR(bridge_loop_detected, S_IRUGO | S_IWUSR, show_bridge_loop_detected,
+		   store_bridge_loop_detected);
+
+static ssize_t show_local_topology_change(struct device *d,
+					     struct device_attribute *attr,
+					     char *buf)
+{
+	struct net_bridge *br = to_bridge(d);
+	return sprintf(buf, "%d\n", br->local_topology_change);
+}
+static void set_local_topology_change(struct net_bridge *br, unsigned long val)
+{
+	br->local_topology_change = val;
+}
+static ssize_t store_local_topology_change(struct device *d,
+			       struct device_attribute *attr, const char *buf,
+			       size_t len)
+{
+	return store_bridge_parm(d, buf, len, set_local_topology_change);
+}
+static DEVICE_ATTR(local_topology_change, S_IRUGO | S_IWUSR,
+		   show_local_topology_change, store_local_topology_change);
+
+//Joan.Huang add end
+
 static ssize_t show_gc_timer(struct device *d, struct device_attribute *attr,
 			     char *buf)
 {
@@ -330,6 +397,122 @@ static ssize_t store_group_addr(struct device *d,
 
 static DEVICE_ATTR(group_addr, S_IRUGO | S_IWUSR,
 		   show_group_addr, store_group_addr);
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//+++Ricky Cao: Above is added for support predefined URL
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+//Expose configured predefined url with command "cat /sys/class/net/br0/bridge/predefined_url"
+static ssize_t show_predefined_url(struct device *d,
+			       struct device_attribute *attr, char *buf)
+{
+	unsigned short idx = 0;
+
+	if (pdUrl.len <= 0 || pdUrl.url == NULL) {
+		return 0;
+	}
+
+	while ( idx < pdUrl.len ){
+		printk("%c", pdUrl.url[idx]);
+		idx++;
+	}
+	printk("\n");
+
+	return 0;
+}
+
+//Configure to predefined url with command "echo "[predefined url]" > /sys/class/net/br0/bridge/predefined_url"
+static ssize_t store_predefined_url(struct device *d, 
+						struct device_attribute *attr, 
+						const char *buf, size_t len)
+{
+	unsigned int idx = 0;
+
+	if (!capable(CAP_NET_ADMIN))
+		return -EPERM;
+
+	if(pdUrl.url != NULL) {
+		kfree(pdUrl.url);
+	}
+	pdUrl.len = 0;
+
+	//The buf will be fill in 0x0a as terminated, so it len is 1 at latest
+	if (len > 1){
+		pdUrl.url = kmalloc(sizeof(char) * (len-1), GFP_USER);
+		memset(pdUrl.url, 0, len-1);
+
+		printk("Configure predefined URL to: \"");
+		while( idx < len && buf[idx] != 0x0a ){
+			printk("%c", buf[idx]);
+			pdUrl.url[idx] = buf[idx];
+			pdUrl.len++;
+			idx++;
+		}
+		printk("\"\n");
+	}
+
+	return len;
+}
+
+//Create predefined_url to /sys/class/net/br0/bridge/
+static DEVICE_ATTR(predefined_url, S_IRUGO | S_IWUSR,
+		   show_predefined_url, store_predefined_url);
+#endif
+//---Ricky Cao: Above is added for support predefined URL
+
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+//Expose configured predefined url with command "cat /sys/class/net/br0/bridge/deny_manage_via_wlan"
+static ssize_t show_deny_manage_via_wlan(struct device *d,
+			       struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", deny_manage_by_wlan);
+}
+
+//Configure to deny manage by GUI via wlan with command "echo "[0 or 1]" > /sys/class/net/br0/bridge/deny_manage_via_wlan"
+static void set_deny_manage_via_wlan(struct net_bridge *br, unsigned long val)
+{
+	deny_manage_by_wlan = (unsigned char)val;
+}
+
+static ssize_t store_deny_manage_via_wlan(struct device *d,
+			       struct device_attribute *attr, const char *buf,
+			       size_t len)
+{
+	return store_bridge_parm(d, buf, len, set_deny_manage_via_wlan);
+}
+
+static DEVICE_ATTR(deny_manage_via_wlan, S_IRUGO | S_IWUSR,
+		   show_deny_manage_via_wlan, store_deny_manage_via_wlan);
+#endif
+//Ricky Cao added Done
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+//Expose configured redirect url enabled with command "cat /sys/class/net/br0/bridge/redirect_url_enabled"
+static ssize_t show_redirect_url_enabled(struct device *d,
+			       struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", redirect_url_enabled);
+}
+
+//Configure to redirect url enabled by GUI via wlan with command "echo "[0 or 1]" > /sys/class/net/br0/bridge/redirect_url_enabled"
+static void set_redirect_url_enabled(struct net_bridge *br, unsigned long val)
+{
+	redirect_url_enabled = (unsigned char)val;
+}
+
+static ssize_t store_redirect_url_enabled(struct device *d,
+			       struct device_attribute *attr, const char *buf,
+			       size_t len)
+{
+	return store_bridge_parm(d, buf, len, set_redirect_url_enabled);
+}
+
+static DEVICE_ATTR(redirect_url_enabled, S_IRUGO | S_IWUSR,
+		   show_redirect_url_enabled, store_redirect_url_enabled);
+
+#endif
+
 
 static ssize_t store_flush(struct device *d,
 			   struct device_attribute *attr,
@@ -716,6 +899,24 @@ static struct attribute *bridge_attrs[] = {
 	&dev_attr_nf_call_iptables.attr,
 	&dev_attr_nf_call_ip6tables.attr,
 	&dev_attr_nf_call_arptables.attr,
+#endif
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	&dev_attr_bridge_loop_detected.attr,     //Joan.Huang add
+	&dev_attr_local_topology_change.attr,     //Joan.Huang add
+//+++Ricky Cao: Above is added for support predefined URL
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+	&dev_attr_predefined_url.attr,
+#endif
+//---Ricky Cao: Above is added for support predefined URL
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+	&dev_attr_deny_manage_via_wlan.attr,
+#endif
+//Ricky Cao added DONE
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+	&dev_attr_redirect_url_enabled.attr,
 #endif
 	NULL
 };

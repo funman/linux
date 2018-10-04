@@ -156,13 +156,14 @@ void __init init_IRQ(void)
  * SMP cross-CPU interrupts have their own specific
  * handlers).
  */
-void __irq_entry do_IRQ(unsigned int irq)
+__IMEM void __irq_entry do_IRQ(unsigned int irq)
 {
 	irq_enter();
 	__DO_IRQ_SMTC_HOOK(irq);
 	generic_handle_irq(irq);
 	irq_exit();
 }
+EXPORT_SYMBOL(do_IRQ);
 
 #ifdef CONFIG_MIPS_MT_SMTC_IRQAFF
 /*

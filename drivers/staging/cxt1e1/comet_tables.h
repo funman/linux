@@ -1,5 +1,5 @@
 /*
- * $Id: comet_tables.h,v 1.5 2006/01/02 22:37:31 rickd PMCC4_3_1B $
+ * $Id: comet_tables.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_COMET_TBLS_H_
@@ -24,11 +24,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.5 $
- * Last changed on $Date: 2006/01/02 22:37:31 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2011-04-07 11:33:22 $
+ * Changed by $Author: bruce $
  *-----------------------------------------------------------------------------
  * $Log: comet_tables.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.5  2006/01/02 22:37:31  rickd
  * Double indexed arrays need sizings to avoid CC errors under
  * gcc 4.0.0

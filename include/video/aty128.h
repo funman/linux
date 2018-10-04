@@ -1,4 +1,4 @@
-/*  $Id: aty128.h,v 1.1 1999/10/12 11:00:40 geert Exp $
+/*  $Id: aty128.h,v 1.1.1.1 2011-04-07 11:33:26 bruce Exp $
  *  linux/drivers/video/aty128.h
  *  Register definitions for ATI Rage128 boards
  *

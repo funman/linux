@@ -62,6 +62,9 @@
 /***
  *
  * $Log: ltpc.c,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:17  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.1.2.1  2000/03/01 05:35:07  jgarzik
  * at and tr cleanup
  *

@@ -1,4 +1,4 @@
-/* $Id: card.h,v 1.1.10.1 2001/09/23 22:24:59 kai Exp $
+/* $Id: card.h,v 1.1.1.1 2011-04-07 11:33:19 bruce Exp $
  *
  * Driver parameters for SpellCaster ISA ISDN adapters
  *

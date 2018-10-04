@@ -48,7 +48,7 @@
 
 /* ioswab[bwlq], __mem_ioswab[bwlq] are defined in mangle-port.h */
 
-#define IO_SPACE_LIMIT 0xffff
+#define IO_SPACE_LIMIT 0xffffffff
 
 /*
  * On MIPS I/O ports are memory mapped, so we access them using normal

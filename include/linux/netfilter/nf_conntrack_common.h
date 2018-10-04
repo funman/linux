@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 #ifndef _NF_CONNTRACK_COMMON_H
 #define _NF_CONNTRACK_COMMON_H
 /* Connection state tracking for netfilter.  This is separated from,
@@ -82,26 +83,83 @@ enum ip_conntrack_status {
 	IPS_UNTRACKED = (1 << IPS_UNTRACKED_BIT),
 };
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
 /* Connection tracking event types */
 enum ip_conntrack_events {
-	IPCT_NEW,		/* new conntrack */
-	IPCT_RELATED,		/* related conntrack */
-	IPCT_DESTROY,		/* destroyed conntrack */
+	/* New conntrack */
+	IPCT_NEW_BIT = 0,
+	IPCT_NEW = (1 << IPCT_NEW_BIT),
+
+	/* Expected connection */
+	IPCT_RELATED_BIT = 1,
+	IPCT_RELATED = (1 << IPCT_RELATED_BIT),
+
+	/* Destroyed conntrack */
+	IPCT_DESTROY_BIT = 2,
+	IPCT_DESTROY = (1 << IPCT_DESTROY_BIT),
+
+	/* Timer has been refreshed */
+	IPCT_REFRESH_BIT = 3,
+	IPCT_REFRESH = (1 << IPCT_REFRESH_BIT),
+
+	/* Status has changed */
+	IPCT_STATUS_BIT = 4,
+	IPCT_STATUS = (1 << IPCT_STATUS_BIT),
+
 	IPCT_REPLY,		/* connection has seen two-way traffic */
+	
 	IPCT_ASSURED,		/* connection status has changed to assured */
-	IPCT_PROTOINFO,		/* protocol information has changed */
+	
+	/* Update of protocol info */
+	IPCT_PROTOINFO_BIT = 5,
+	IPCT_PROTOINFO = (1 << IPCT_PROTOINFO_BIT),
+
+	/* Volatile protocol info */
+	IPCT_PROTOINFO_VOLATILE_BIT = 6,
+	IPCT_PROTOINFO_VOLATILE = (1 << IPCT_PROTOINFO_VOLATILE_BIT),
+
+
 	IPCT_HELPER,		/* new helper has been set */
-	IPCT_MARK,		/* new mark has been set */
+
+	/* Update of helper info */
+	IPCT_HELPINFO_BIT = 8,
+	IPCT_HELPINFO = (1 << IPCT_HELPINFO_BIT),
+
+	/* Volatile helper info */
+	IPCT_HELPINFO_VOLATILE_BIT = 9,
+	IPCT_HELPINFO_VOLATILE = (1 << IPCT_HELPINFO_VOLATILE_BIT),
+
+	/* NAT info */
+	IPCT_NATINFO_BIT = 10,
+	IPCT_NATINFO = (1 << IPCT_NATINFO_BIT),
+
+	/* Counter highest bit has been set */
+	IPCT_COUNTER_FILLING_BIT = 11,
+	IPCT_COUNTER_FILLING = (1 << IPCT_COUNTER_FILLING_BIT),
+	/* Mark is set */
+	IPCT_MARK_BIT = 12,
+	IPCT_MARK = (1 << IPCT_MARK_BIT),
+	
 	IPCT_NATSEQADJ,		/* NAT is doing sequence adjustment */
 	IPCT_SECMARK,		/* new security mark has been set */
 };
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
 enum ip_conntrack_expect_events {
-	IPEXP_NEW,		/* new expectation */
+	IPEXP_NEW_BIT = 0,
+	IPEXP_NEW = (1 << IPEXP_NEW_BIT),
 };
 
 #ifdef __KERNEL__
-struct ip_conntrack_stat {
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+struct ip_conntrack_counter
+{
+	u_int32_t packets;
+	u_int32_t bytes;
+};
+
+struct ip_conntrack_stat
+{
 	unsigned int searched;
 	unsigned int found;
 	unsigned int new;

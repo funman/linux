@@ -1,5 +1,5 @@
 /*
- * $Id: sbeproc.h,v 1.2 2005/10/17 23:55:28 rickd PMCC4_3_1B $
+ * $Id: sbeproc.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_SBEPROC_H_
@@ -24,11 +24,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.2 $
- * Last changed on $Date: 2005/10/17 23:55:28 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2011-04-07 11:33:22 $
+ * Changed by $Author: bruce $
  *-----------------------------------------------------------------------------
  * $Log: sbeproc.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.2  2005/10/17 23:55:28  rickd
  * sbecom_proc_brd_init() is an declared an __init function.
  *

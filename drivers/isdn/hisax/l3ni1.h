@@ -1,4 +1,4 @@
-/* $Id: l3ni1.h,v 2.3.6.2 2001/09/23 22:24:50 kai Exp $
+/* $Id: l3ni1.h,v 1.1.1.1 2011-04-07 11:33:19 bruce Exp $
  *
  * NI1 D-channel protocol
  *

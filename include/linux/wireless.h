@@ -1,3 +1,4 @@
+//Oct 17, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * This file define a set of standard wireless extensions
  *
@@ -537,7 +538,7 @@
 #define IW_SCAN_TYPE_ACTIVE 0
 #define IW_SCAN_TYPE_PASSIVE 1
 /* Maximum size of returned data */
-#define IW_SCAN_MAX_DATA	4096	/* In bytes */
+#define IW_SCAN_MAX_DATA	4096*3	/* In bytes */ //Tom.Hung 2012-10-17, Increase return size. (default: 4096)
 
 /* Scan capability flags - in (struct iw_range *)->scan_capa */
 #define IW_SCAN_CAPA_NONE		0x00

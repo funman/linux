@@ -278,6 +278,7 @@ NESTED(except_vec_vi_handler, 0, sp)
 	 * service routine will have cleared the state, and any active
 	 * level represents a new or otherwised unserviced event...
 	 */
+#ifndef CONFIG_MIPS_TC3262
 	mfc0	t1, CP0_STATUS
 	and	t0, a0, t1
 #ifdef CONFIG_MIPS_MT_SMTC_IM_BACKSTOP
@@ -288,6 +289,7 @@ NESTED(except_vec_vi_handler, 0, sp)
 	xor	t1, t1, t0
 	mtc0	t1, CP0_STATUS
 	_ehb
+#endif
 #endif /* CONFIG_MIPS_MT_SMTC */
 	CLI
 #ifdef CONFIG_TRACE_IRQFLAGS

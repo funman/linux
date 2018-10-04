@@ -1,3 +1,4 @@
+//Oct 29, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	Handle incoming frames
  *	Linux ethernet bridge
@@ -17,6 +18,26 @@
 #include <linux/etherdevice.h>
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//+++Ricky Cao: Below is added for support predefined url
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+#include "br_umedia_predefine_url.h"
+#endif
+//---Ricky Cao: Above is added for support predefined url
+
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+extern unsigned char deny_manage_by_wlan;
+int br_deny_http_to_device(struct net_bridge_port *p, struct sk_buff *pskb);
+#endif
+//Ricky Cao added DONE
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+extern unsigned char redirect_url_enabled;
+int br_rdu_chk_dnsqry(struct net_bridge_port *p, struct sk_buff *pskb);
+#endif
 
 /* Bridge group multicast address 802.1d (pg 51). */
 const u8 br_group_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x00 };
@@ -146,12 +167,43 @@ struct sk_buff *br_handle_frame(struct sk_buff *skb)
 
 	if (!is_valid_ether_addr(eth_hdr(skb)->h_source))
 		goto drop;
-
+		
 	skb = skb_share_check(skb, GFP_ATOMIC);
 	if (!skb)
 		return NULL;
 
 	p = br_port_get_rcu(skb->dev);
+
+	//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+		//+++Ricky Cao: Below is added for support to pre-define URL
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+		if(pdUrl.len > 0 && pdUrl.url != NULL){
+			if(br_check_dns_query(p, skb)){
+				return NULL;
+			}
+		}
+#endif
+		//---Ricky Cao: Above is added for support to pre-define URL
+
+	//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+	if (deny_manage_by_wlan) {
+		if (br_deny_http_to_device(p, skb)) {
+			kfree_skb(skb);
+			return NULL;
+		}
+	}
+#endif
+	//Ricky Cao added Done
+
+	//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+if (redirect_url_enabled == 1) {
+	if (br_rdu_chk_dnsqry(p, skb)) {
+		return NULL;
+	}
+}
+#endif
 
 	if (unlikely(is_link_local(dest))) {
 		/* Pause frames shouldn't be passed up by driver anyway */

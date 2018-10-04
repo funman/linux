@@ -13,9 +13,12 @@
  * General Public License for more details.
  *
  *
- * $Id: aha152x.c,v 2.7 2004/01/24 11:42:59 fischer Exp $
+ * $Id: aha152x.c,v 1.1.1.1 2011-04-07 11:33:21 bruce Exp $
  *
  * $Log: aha152x.c,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:21  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 2.7  2004/01/24 11:42:59  fischer
  * - gather code that is not used by PCMCIA at the end
  * - move request_region for !PCMCIA case to detection

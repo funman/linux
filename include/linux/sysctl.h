@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * sysctl.h: General linux system control interface
  *
@@ -325,6 +326,8 @@ enum
 	NET_NF_CONNTRACK_FRAG6_LOW_THRESH=30,
 	NET_NF_CONNTRACK_FRAG6_HIGH_THRESH=31,
 	NET_NF_CONNTRACK_CHECKSUM=32,
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	NET_NF_CONNTRACK_FLUSH=33, //Ricky CAO: Added for user space program to notify netfilter to clear connection track table
 };
 
 /* /proc/sys/net/ipv4 */
@@ -1013,6 +1016,8 @@ extern int proc_do_large_bitmap(struct ctl_table *, int,
 /* A sysctl table is an array of struct ctl_table: */
 struct ctl_table 
 {
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	int ctl_name;                   /* Binary ID */
 	const char *procname;		/* Text ID for /proc/sys, or zero */
 	void *data;
 	int maxlen;

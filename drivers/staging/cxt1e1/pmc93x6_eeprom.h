@@ -1,5 +1,5 @@
 /*
- * $Id: pmc93x6_eeprom.h,v 1.1 2005/09/28 00:10:08 rickd PMCC4_3_1B $
+ * $Id: pmc93x6_eeprom.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_PMC93X6_EEPROM_H_
@@ -26,6 +26,9 @@
  * RCS info:
  *-----------------------------------------------------------------------------
  * $Log: pmc93x6_eeprom.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.1  2005/09/28 00:10:08  rickd
  * pmc_verify_cksum return value is char.
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: comet.h,v 1.3 2005/09/28 00:10:07 rickd PMCC4_3_1B $
+ * $Id: comet.h,v 1.1.1.1 2011-04-07 11:33:22 bruce Exp $
  */
 
 #ifndef _INC_COMET_H_
@@ -24,11 +24,14 @@
  * SBE, Inc.  San Ramon, California  U.S.A.
  *-----------------------------------------------------------------------------
  * RCS info:
- * RCS revision: $Revision: 1.3 $
- * Last changed on $Date: 2005/09/28 00:10:07 $
- * Changed by $Author: rickd $
+ * RCS revision: $Revision: 1.1.1.1 $
+ * Last changed on $Date: 2011-04-07 11:33:22 $
+ * Changed by $Author: bruce $
  *-----------------------------------------------------------------------------
  * $Log: comet.h,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:22  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.3  2005/09/28 00:10:07  rickd
  * Add RCS header. Switch to structure usage.
  *

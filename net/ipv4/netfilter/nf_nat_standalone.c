@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /* (C) 1999-2001 Paul `Rusty' Russell
  * (C) 2002-2006 Netfilter Core Team <coreteam@netfilter.org>
  *
@@ -87,6 +88,9 @@ nf_nat_fn(unsigned int hooknum,
 
 	/* We never see fragments: conntrack defrags on pre-routing
 	   and local-out, and nf_nat_out protects post-routing. */
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	   
+	// Arthur add ESP
+	if (ip_hdr(skb)->protocol != IPPROTO_ESP)
 	NF_CT_ASSERT(!(ip_hdr(skb)->frag_off & htons(IP_MF | IP_OFFSET)));
 
 	ct = nf_ct_get(skb, &ctinfo);

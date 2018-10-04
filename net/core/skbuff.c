@@ -69,6 +69,10 @@
 #include <trace/events/skb.h>
 
 #include "kmap_skb.h"
+#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#include "../net/nat/hw_nat/ra_nat.h"
+#include "../net/nat/hw_nat/frame_engine.h"
+#endif
 
 static struct kmem_cache *skbuff_head_cache __read_mostly;
 static struct kmem_cache *skbuff_fclone_cache __read_mostly;
@@ -427,6 +431,7 @@ void __kfree_skb(struct sk_buff *skb)
 {
 	skb_release_all(skb);
 	kfree_skbmem(skb);
+
 }
 EXPORT_SYMBOL(__kfree_skb);
 
@@ -797,6 +802,10 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	int size = nhead + (skb->end - skb->head) + ntail;
 #endif
 	long off;
+#if defined (HNAT_USE_TAILROOM)
+	ntail += FOE_INFO_LEN;
+	size += FOE_INFO_LEN; 
+#endif
 
 	BUG_ON(nhead < 0);
 
@@ -818,6 +827,14 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 #endif
 	memcpy(data + size, skb_end_pointer(skb),
 	       offsetof(struct skb_shared_info, frags[skb_shinfo(skb)->nr_frags]));
+
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#if defined (HNAT_USE_HEADROOM)
+	memcpy(data, skb->head, FOE_INFO_LEN); //copy headroom
+#elif defined (HNAT_USE_TAILROOM)
+	memcpy( (data + size - FOE_INFO_LEN), (skb->end - FOE_INFO_LEN), FOE_INFO_LEN); //copy tailroom
+#endif
+#endif
 
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 		get_page(skb_shinfo(skb)->frags[i].page);

@@ -1,4 +1,4 @@
-/* $Id: sunhme.h,v 1.33 2001/08/03 06:23:04 davem Exp $
+/* $Id: sunhme.h,v 1.1.1.1 2011-04-07 11:33:17 bruce Exp $
  * sunhme.h: Definitions for Sparc HME/BigMac 10/100baseT ethernet driver.
  *           Also known as the "Happy Meal".
  *
