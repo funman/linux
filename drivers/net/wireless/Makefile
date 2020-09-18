@@ -1,3 +1,4 @@
+#Aug 22, 2012--Modifications were made by U-Media Communication, inc.
 #
 # Makefile for the Linux Wireless network device drivers.
 #
@@ -52,3 +53,28 @@ obj-$(CONFIG_MAC80211_HWSIM)	+= mac80211_hwsim.o
 obj-$(CONFIG_WL12XX)	+= wl12xx/
 
 obj-$(CONFIG_IWM)	+= iwmc3200wifi/
+
+ifneq ($(CONFIG_RTPCI_AP),)
+obj-$(CONFIG_RTPCI_AP)      	+= RTPCI_ap/
+endif
+ifneq ($(CONFIG_RT5592_STA),)
+obj-$(CONFIG_RT5592_STA)	+= RT5592_sta/
+endif
+ifneq ($(CONFIG_RT3090_AP),)
+obj-$(CONFIG_RT3090_AP)      	+= RT3090_ap/
+endif
+ifneq ($(CONFIG_RT5392_AP),)
+obj-$(CONFIG_RT5392_AP)      	+= RT5392_ap/
+endif
+ifneq ($(CONFIG_RT5592_AP),)
+obj-$(CONFIG_RT5592_AP)      	+= RT5592_ap/
+endif
+ifneq ($(CONFIG_RT3593_AP),)
+obj-$(CONFIG_RT3593_AP)      	+= RT3593_ap/
+endif
+ifneq ($(CONFIG_RT3572_AP),)
+obj-$(CONFIG_RT3572_AP)      	+= RT3572_ap/
+endif
+ifneq ($(CONFIG_RT5572_AP),)
+obj-$(CONFIG_RT5572_AP)      	+= RT5572_ap/
+endif

@@ -7,6 +7,9 @@
  *
  * This file contains the general definitions for the cyclades.c driver
  *$Log: cyclades.h,v $
+ *Revision 1.1.1.1  2011-04-07 11:33:23  bruce
+ *BBU linux 2.6.36 source without modification
+ *
  *Revision 3.1  2002/01/29 11:36:16  henrique
  *added throttle field on struct cyclades_port to indicate whether the
  *port is throttled or not

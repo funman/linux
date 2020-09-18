@@ -79,6 +79,12 @@
 #include <asm/smp.h>
 #endif
 
+
+#if defined(CONFIG_UMEDIA_WAP783L) || defined(CONFIG_UMEDIA_WST786L) || defined(CONFIG_UMEDIA_WST376L)
+extern void ralink_gpio_led_init_timer();
+extern void blink_pwr_led();
+#endif
+
 static int kernel_init(void *);
 
 extern void init_IRQ(void);
@@ -596,6 +602,7 @@ asmlinkage void __init start_kernel(void)
 	 * time - but meanwhile we still have a functioning scheduler.
 	 */
 	sched_init();
+
 	/*
 	 * Disable preemption - early bootup scheduling is extremely
 	 * fragile until we cpu_idle() for the first time.
@@ -616,6 +623,12 @@ asmlinkage void __init start_kernel(void)
 	hrtimers_init();
 	softirq_init();
 	timekeeping_init();
+
+#if defined(CONFIG_UMEDIA_WAP783L) || defined(CONFIG_UMEDIA_WST786L) || defined(CONFIG_UMEDIA_WST376L) //high active
+	//start the POWER LED blinking here to let it blink smoothly with uboot, tim.wang@u-media.com.tw, 2013-1-11
+	ralink_gpio_led_init_timer();  //will turn on power led, not the same as wes610nv2 which is to turn off however
+	blink_pwr_led();
+#endif
 	time_init();
 	profile_init();
 	if (!irqs_disabled())
@@ -693,7 +706,6 @@ asmlinkage void __init start_kernel(void)
 	cpuset_init();
 	taskstats_init_early();
 	delayacct_init();
-
 	check_bugs();
 
 	acpi_early_init(); /* before LAPIC and SMP init */

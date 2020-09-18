@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /* (C) 1999-2001 Paul `Rusty' Russell
  * (C) 2002-2004 Netfilter Core Team <coreteam@netfilter.org>
  *
@@ -31,6 +32,8 @@
 
 MODULE_LICENSE("GPL");
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+extern unsigned int nf_conntrack_clear; //Ricky CAO: Added for user space program to notify netfilter to clear connection track table
 #ifdef CONFIG_PROC_FS
 int
 print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,
@@ -176,6 +179,18 @@ static int ct_seq_show(struct seq_file *s, void *v)
 #ifdef CONFIG_NF_CONNTRACK_ZONES
 	if (seq_printf(s, "zone=%u ", nf_ct_zone(ct)))
 		goto release;
+#endif
+
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto &&
+           seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
+		return -ENOSPC;
+#endif
+
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto &&
+           seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
+		return -ENOSPC;
 #endif
 
 	if (seq_printf(s, "use=%u\n", atomic_read(&ct->ct_general.use)))
@@ -404,6 +419,17 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec,
 	},
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	//Ricky CAO: Below is added for user space program to notify netfilter to clear connection track table
+	{
+		.ctl_name	= NET_NF_CONNTRACK_FLUSH,
+		.procname	= "nf_conntrack_flush",
+		.data		= &nf_conntrack_clear,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	}, 
+	//Ricky CAO: Above is added for user space program to notify netfilter to clear connection track table
 	{ }
 };
 

@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	Forwarding database
  *	Linux ethernet bridge
@@ -53,9 +54,15 @@ void br_fdb_fini(void)
 /* if topology_changing then use forward_delay (default 15 sec)
  * otherwise keep longer (default 5 minutes)
  */
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
 static inline unsigned long hold_time(const struct net_bridge *br)
 {
+	if(br->local_topology_change)
+	{
+		return br->forward_delay;
+	}else{
 	return br->topology_change ? br->forward_delay : br->ageing_time;
+}
 }
 
 static inline int has_expired(const struct net_bridge *br,
@@ -394,9 +401,16 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		/* attempt to update an entry for a local interface */
 		if (unlikely(fdb->is_local)) {
 			if (net_ratelimit())
+//2013/12/20, Dias Kuo, Comment out a debug message for receiving own source address packets
+#if 0
 				br_warn(br, "received packet on %s with "
 					"own address as source address\n",
 					source->dev->name);
+#endif
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]					
+					//2010.11.12 Joan.Huang add for loop prevention
+					br->bridge_loop_detected=1;
+					br->local_topology_change=1;
 		} else {
 			/* fastpath: update of existing entry */
 			fdb->dst = source;

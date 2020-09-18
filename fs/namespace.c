@@ -1,3 +1,4 @@
+//Dec 6, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *  linux/fs/namespace.c
  *
@@ -36,6 +37,8 @@
 #include <asm/unistd.h>
 #include "pnode.h"
 #include "internal.h"
+
+#include "../include/linux/autoconf.h"
 
 #define HASH_SHIFT ilog2(PAGE_SIZE / sizeof(struct list_head))
 #define HASH_SIZE (1UL << HASH_SHIFT)

@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * H.323 extension for NAT alteration.
  *
@@ -239,10 +240,18 @@ static int nat_rtp_rtcp(struct sk_buff *skb, struct nf_conn *ct,
 	}
 
 	/* Modify signal */
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	/*
+	if (set_h245_addr(pskb, data, dataoff, taddr,
+			  &ct->tuplehash[!dir].tuple.dst.u3,
+			  htons((port & htons(1)) ? nated_port + 1 : nated_port)) == 0) {
+			  */
+	//2010.06.10 Joan.Huang modify fix DUT some time fail on CDRouter test case cdrouter_app_207
+	//Fail on RTP port is odd number pass on RTP port is even number.
+	//The original calculation is not good it will result in H.245 server mistake.
 	if (set_h245_addr(skb, data, dataoff, taddr,
 			  &ct->tuplehash[!dir].tuple.dst.u3,
-			  htons((port & htons(1)) ? nated_port + 1 :
-						    nated_port)) == 0) {
+		  htons(nated_port)) == 0) {
 		/* Save ports */
 		info->rtp_port[i][dir] = rtp_port;
 		info->rtp_port[i][!dir] = htons(nated_port);

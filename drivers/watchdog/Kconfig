@@ -974,6 +974,13 @@ config WATCHDOG_RTAS
 	  To compile this driver as a module, choose M here. The module
 	  will be called wdrtas.
 
+config RALINK_WATCHDOG
+        tristate "Ralink APSoC Hardware Watchdog"
+        depends on WATCHDOG
+        help
+          timer expired and no process has written to /dev/watchdog during
+          that time.
+
 # S390 Architecture
 
 config ZVM_WATCHDOG

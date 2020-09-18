@@ -1,3 +1,4 @@
+//Dec 6, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * NET		An implementation of the SOCKET network access protocol.
  *
@@ -2335,6 +2336,7 @@ int sock_register(const struct net_proto_family *ops)
 	spin_unlock(&net_family_lock);
 
 	printk(KERN_INFO "NET: Registered protocol family %d\n", ops->family);
+
 	return err;
 }
 EXPORT_SYMBOL(sock_register);

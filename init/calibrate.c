@@ -1,3 +1,4 @@
+//Dec 6, 2012--Modifications were made by U-Media Communication, inc.
 /* calibrate.c: default delay calibration
  *
  * Excised from init/main.c
@@ -9,6 +10,8 @@
 #include <linux/init.h>
 #include <linux/timex.h>
 #include <linux/smp.h>
+
+#include <linux/autoconf.h>
 
 unsigned long lpj_fine;
 unsigned long preset_lpj;
@@ -146,8 +149,9 @@ void __cpuinit calibrate_delay(void)
 		while ((loops_per_jiffy <<= 1) != 0) {
 			/* wait for "start of" clock tick */
 			ticks = jiffies;
-			while (ticks == jiffies)
+			while (ticks == jiffies) {
 				/* nothing */;
+			}
 			/* Go .. */
 			ticks = jiffies;
 			__delay(loops_per_jiffy);
@@ -155,7 +159,6 @@ void __cpuinit calibrate_delay(void)
 			if (ticks)
 				break;
 		}
-
 		/*
 		 * Do a binary approximation to get loops_per_jiffy set to
 		 * equal one clock (up to lps_precision bits)
@@ -165,8 +168,9 @@ void __cpuinit calibrate_delay(void)
 		while (lps_precision-- && (loopbit >>= 1)) {
 			loops_per_jiffy |= loopbit;
 			ticks = jiffies;
-			while (ticks == jiffies)
+			while (ticks == jiffies) {
 				/* nothing */;
+			}
 			ticks = jiffies;
 			__delay(loops_per_jiffy);
 			if (jiffies != ticks)	/* longer than 1 tick */

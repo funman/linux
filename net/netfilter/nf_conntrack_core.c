@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /* Connection state tracking for netfilter.  This is separated from,
    but required by, the NAT layer; it can also be used by an iptables
    extension. */
@@ -46,7 +47,19 @@
 #include <net/netfilter/nf_nat.h>
 #include <net/netfilter/nf_nat_core.h>
 
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#endif
+
 #define NF_CONNTRACK_VERSION	"0.5.0"
+
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+extern char wan_name[IFNAMSIZ];
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//2010.06.01 Joan.Huang
+//Fix on NAT type is Address Restricted Cone but behavior is port restricted cone when WAN type is PPPoE, PPTP and L2TP.
+extern char wan_ppp[IFNAMSIZ];
+#endif
 
 int (*nfnetlink_parse_nat_setup_hook)(struct nf_conn *ct,
 				      enum nf_nat_manip_type manip,
@@ -62,9 +75,14 @@ EXPORT_SYMBOL_GPL(nf_conntrack_htable_size);
 unsigned int nf_conntrack_max __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//Ricky CAO: Below veriable is added for user space program to notify netfilter to clear connection track table
+unsigned int nf_conntrack_clear = 0;
 DEFINE_PER_CPU(struct nf_conn, nf_conntrack_untracked);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_untracked);
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+static int kill_all(struct nf_conn *i, void *data);
 static int nf_conntrack_hash_rnd_initted;
 static unsigned int nf_conntrack_hash_rnd;
 
@@ -74,6 +92,18 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 	unsigned int n;
 	u_int32_t h;
 
+#if defined (CONFIG_NAT_FCONE) /* Full Cone */
+        n = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all),
+                   tuple->dst.u.all); // dst ip, dst port
+        h = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all),
+                   tuple->dst.protonum); //dst ip, & dst ip protocol
+#elif defined (CONFIG_NAT_RCONE) /* Restricted Cone */
+        n = jhash((void *)tuple->src.u3.all, sizeof(tuple->src.u3.all), //src ip
+                   (tuple->src.l3num << 16) | tuple->dst.protonum);
+        h = jhash((void *)tuple->dst.u3.all, sizeof(tuple->dst.u3.all), //dst ip & dst port
+                  (tuple->dst.u.all << 16) | tuple->dst.protonum);
+#else /* CONFIG_NAT_LINUX */
+
 	/* The direction must be ignored, so we hash everything up to the
 	 * destination ports (which is a multiple of 4) and treat the last
 	 * three bytes manually.
@@ -82,6 +112,7 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 	h = jhash2((u32 *)tuple, n,
 		   zone ^ rnd ^ (((__force __u16)tuple->dst.u.all << 16) |
 				 tuple->dst.protonum));
+#endif
 
 	return ((u64)h * size) >> 32;
 }
@@ -202,6 +233,22 @@ destroy_conntrack(struct nf_conntrack *nfct)
 	 * too. */
 	nf_ct_remove_expectations(ct);
 
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto)
+		kfree(ct->layer7.app_proto);
+	if(ct->layer7.app_data)
+	kfree(ct->layer7.app_data);
+#endif
+
+
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	if(ct->layer7.app_proto)
+		kfree(ct->layer7.app_proto);
+	if(ct->layer7.app_data)
+	kfree(ct->layer7.app_data);
+#endif
+
+
 	/* We overload first tuple to link into unconfirmed list. */
 	if (!nf_ct_is_confirmed(ct)) {
 		BUG_ON(hlist_nulls_unhashed(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnnode));
@@ -300,6 +347,16 @@ __nf_conntrack_find(struct net *net, u16 zone,
 	struct hlist_nulls_node *n;
 	unsigned int hash = hash_conntrack(net, zone, tuple);
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	//Ricky CAO: Below is added for user space program to clear connection track table
+	//			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+    	if(nf_conntrack_clear){
+		nf_conntrack_clear=0;
+		nf_ct_iterate_cleanup(net, kill_all, NULL);
+		printk("Clear connection track table\n");
+    	}
+    	//Ricky CAO: Above is added for user space program to clear connection track table
+
 	/* Disable BHs the entire time since we normally need to disable them
 	 * at least once for the stats anyway.
 	 */
@@ -328,6 +385,88 @@ begin:
 	return NULL;
 }
 EXPORT_SYMBOL_GPL(__nf_conntrack_find);
+
+/* Added by Steven Liu */
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+
+struct nf_conntrack_tuple_hash *
+	__nf_cone_conntrack_find(struct net *net, u16 zone,
+		    const struct nf_conntrack_tuple *tuple)
+{
+    struct nf_conntrack_tuple_hash *h;
+    struct hlist_nulls_node *n;
+    unsigned int hash = hash_conntrack(net, zone, tuple);
+
+    /* Disable BHs the entire time since we normally need to disable them
+     * at least once for the stats anyway.
+     */
+    local_bh_disable();
+begin:
+    hlist_nulls_for_each_entry_rcu(h, n, &net->ct.hash[hash], hnnode) {
+	if (nf_ct_cone_tuple_equal(tuple, &h->tuple) &&
+		nf_ct_zone(nf_ct_tuplehash_to_ctrack(h)) == zone) {
+	    NF_CT_STAT_INC(net, found);
+	    local_bh_enable();
+	    return h;
+	}
+	NF_CT_STAT_INC(net, searched);
+    }
+    /*
+     * if the nulls value we got at the end of this lookup is
+     * not the expected one, we must restart lookup.
+     * We probably met an item that was moved to another chain.
+     */
+    if (get_nulls_value(n) != hash) {
+	NF_CT_STAT_INC(net, search_restart);
+	goto begin;
+    }
+    local_bh_enable();
+
+    return NULL;
+
+}
+
+/* Find a connection corresponding to a tuple. */
+struct nf_conntrack_tuple_hash *
+nf_cone_conntrack_find_get(struct net *net, u16 zone,
+		      const struct nf_conntrack_tuple *tuple)
+{
+    struct nf_conntrack_tuple_hash *h;
+    struct nf_conn *ct;
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+    //Ricky CAO: Below is added for user space program to clear connection track table
+    //			When user set /proc/sys/net/nf_conntrack_flush to , then clear table
+    if(nf_conntrack_clear){
+    	nf_conntrack_clear=0;
+	nf_ct_iterate_cleanup(net, kill_all, NULL);
+	printk("Clear connection track table\n");
+    }
+    //Ricky CAO: Above is added for user space program to clear connection track table
+
+    rcu_read_lock();
+begin:
+    h = __nf_cone_conntrack_find(net, zone, tuple);
+    if (h) {
+	ct = nf_ct_tuplehash_to_ctrack(h);
+	if (unlikely(nf_ct_is_dying(ct) ||
+		    !atomic_inc_not_zero(&ct->ct_general.use)))
+	    h = NULL;
+	else {
+	    if (unlikely(!nf_ct_cone_tuple_equal(tuple, &h->tuple) ||
+			nf_ct_zone(ct) != zone)) {
+		nf_ct_put(ct);
+		goto begin;
+	    }
+	}
+    }
+    rcu_read_unlock();
+
+    return h;
+}
+EXPORT_SYMBOL_GPL(nf_cone_conntrack_find_get);
+
+#endif
 
 /* Find a connection corresponding to a tuple. */
 struct nf_conntrack_tuple_hash *
@@ -764,7 +903,70 @@ resolve_normal_ct(struct net *net, struct nf_conn *tmpl,
 	}
 
 	/* look for tuple match */
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+        /*
+         * Based on NAT treatments of UDP in RFC3489:
+         *
+         * 1)Full Cone: A full cone NAT is one where all requests from the
+         * same internal IP address and port are mapped to the same external
+         * IP address and port.  Furthermore, any external host can send a
+         * packet to the internal host, by sending a packet to the mapped
+         * external address.
+         *
+         * 2)Restricted Cone: A restricted cone NAT is one where all requests
+         * from the same internal IP address and port are mapped to the same
+         * external IP address and port.  Unlike a full cone NAT, an external
+         * host (with IP address X) can send a packet to the internal host
+         * only if the internal host had previously sent a packet to IP
+         * address X.
+         *
+         * 3)Port Restricted Cone: A port restricted cone NAT is like a
+         * restricted cone NAT, but the restriction includes port numbers.
+         * Specifically, an external host can send a packet, with source IP
+         * address X and source port P, to the internal host only if the
+         * internal host had previously sent a packet to IP address X and
+         * port P.
+         *
+         * 4)Symmetric: A symmetric NAT is one where all requests from the
+         * same internal IP address and port, to a specific destination IP
+         * address and port, are mapped to the same external IP address and
+         * port.  If the same host sends a packet with the same source
+         * address and port, but to a different destination, a different
+         * mapping is used.  Furthermore, only the external host that
+         * receives a packet can send a UDP packet back to the internal host.
+         *
+         *
+         *
+         *
+         * Original Linux NAT type is hybrid 'port restricted cone' and
+         * 'symmetric'. XBOX certificate recommands NAT type is 'fully cone'
+         * or 'restricted cone', so i patch the linux kernel to support
+         * this feature
+         * Tradition scenario from LAN->WAN:
+         *
+         *        (LAN)     (WAN)
+         * Client------>AP---------> Server
+         * -------------> (I)
+         *              -------------->(II)
+         *              <--------------(III)
+         * <------------- (IV)
+         *
+         */
+	/* CASE III */
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	//2010.06.01 Joan.Huang
+	//Fix on NAT type is Address Restricted Cone but behavior is port restricted cone when WAN type is PPPoE, PPTP and L2TP.
+	if( (skb->dev!=NULL) && ((strcmp(skb->dev->name, wan_name)==0)||(strcmp(skb->dev->name, wan_ppp)==0)) && 
+	    (l4proto->l4proto == IPPROTO_UDP) ) {
+	    h = nf_cone_conntrack_find_get(net, zone, &tuple);
+        }else{ /* CASE I.II.IV */
+	    h = nf_conntrack_find_get(net, zone, &tuple);
+        }
+#else //CONFIG_NAT_LINUX
 	h = nf_conntrack_find_get(net, zone, &tuple);
+#endif
+
 	if (!h) {
 		h = init_conntrack(net, tmpl, &tuple, l3proto, l4proto,
 				   skb, dataoff);
@@ -786,11 +988,11 @@ resolve_normal_ct(struct net *net, struct nf_conn *tmpl,
 			pr_debug("nf_conntrack_in: normal packet for %p\n", ct);
 			*ctinfo = IP_CT_ESTABLISHED;
 		} else if (test_bit(IPS_EXPECTED_BIT, &ct->status)) {
-			pr_debug("nf_conntrack_in: related packet for %p\n",
-				 ct);
+			pr_debug("nf_conntrack_in: related packet for %p\n", ct);
 			*ctinfo = IP_CT_RELATED;
 		} else {
 			pr_debug("nf_conntrack_in: new packet for %p\n", ct);
+
 			*ctinfo = IP_CT_NEW;
 		}
 		*set_reply = 0;
@@ -805,6 +1007,9 @@ nf_conntrack_in(struct net *net, u_int8_t pf, unsigned int hooknum,
 		struct sk_buff *skb)
 {
 	struct nf_conn *ct, *tmpl = NULL;
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	struct nf_conn_help *help;
+#endif
 	enum ip_conntrack_info ctinfo;
 	struct nf_conntrack_l3proto *l3proto;
 	struct nf_conntrack_l4proto *l4proto;
@@ -882,6 +1087,18 @@ nf_conntrack_in(struct net *net, u_int8_t pf, unsigned int hooknum,
 		ret = -ret;
 		goto out;
 	}
+
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	help = nfct_help(ct);
+	if (help && help->helper) {
+            if( IS_SPACE_AVAILABLED(skb) &&
+                    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) ||
+                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN) ||
+                     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE))){
+                    FOE_ALG(skb)=1;
+            }
+        }
+#endif
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
 		nf_conntrack_event_cache(IPCT_REPLY, ct);

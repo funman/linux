@@ -13,6 +13,9 @@
  * L. Haag
  *
  * $Log: n_r3964.c,v $
+ * Revision 1.1.1.1  2011-04-07 11:33:16  bruce
+ * BBU linux 2.6.36 source without modification
+ *
  * Revision 1.10  2001/03/18 13:02:24  dwmw2
  * Fix timer usage, use spinlocks properly.
  *

@@ -187,8 +187,6 @@
 		 * need it to operate correctly
 		 */
 		LONG_S	$0, PT_R0(sp)
-		mfc0	v1, CP0_STATUS
-		LONG_S	$2, PT_R2(sp)
 #ifdef CONFIG_MIPS_MT_SMTC
 		/*
 		 * Ideally, these instructions would be shuffled in
@@ -199,6 +197,8 @@
 		.set	mips0
 		LONG_S	v1, PT_TCSTATUS(sp)
 #endif /* CONFIG_MIPS_MT_SMTC */
+		mfc0	v1, CP0_STATUS
+		LONG_S	$2, PT_R2(sp)
 		LONG_S	$4, PT_R4(sp)
 		LONG_S	$5, PT_R5(sp)
 		LONG_S	v1, PT_STATUS(sp)

@@ -1,3 +1,4 @@
+#Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 #
 # IP netfilter configuration
 #
@@ -257,6 +258,11 @@ config NF_NAT_IRC
 	depends on NF_CONNTRACK && NF_NAT
 	default NF_NAT && NF_CONNTRACK_IRC
 
+config NF_NAT_RTSP
+	tristate
+ 	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
+ 	default NF_NAT && NF_CONNTRACK_RTSP
+
 config NF_NAT_TFTP
 	tristate
 	depends on NF_CONNTRACK && NF_NAT
@@ -282,6 +288,21 @@ config NF_NAT_SIP
 	tristate
 	depends on NF_CONNTRACK && NF_NAT
 	default NF_NAT && NF_CONNTRACK_SIP
+
+config NF_NAT_RTSP
+	tristate
+	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
+	default NF_NAT && NF_CONNTRACK_RTSP	
+
+config NF_NAT_MMS
+	tristate
+	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
+	default NF_NAT && NF_CONNTRACK_MMS	
+
+config NF_NAT_ESP
+	tristate
+	depends on IP_NF_IPTABLES && NF_CONNTRACK && NF_NAT
+	default NF_NAT && NF_CONNTRACK_ESP	
 
 # mangle + specific targets
 config IP_NF_MANGLE

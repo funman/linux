@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * connection tracking helpers.
  *
@@ -25,6 +26,8 @@ struct nf_conntrack_helper {
 
 	/* Tuple of things we will help (compared against server response) */
 	struct nf_conntrack_tuple tuple;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	struct nf_conntrack_tuple mask;
 
 	/* Function to call when data passes; return verdict, or -1 to
            invalidate. */

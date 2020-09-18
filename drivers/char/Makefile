@@ -10,6 +10,9 @@ FONTMAPFILE = cp437.uni
 obj-y	 += mem.o random.o tty_io.o n_tty.o tty_ioctl.o tty_ldisc.o tty_buffer.o tty_port.o
 
 obj-y				+= tty_mutex.o
+obj-$(CONFIG_RALINK_GPIO)	+= ralink_gpio.o
+obj-$(CONFIG_RALINK_GDMA)       += ralink_gdma.o
+obj-$(CONFIG_RALINK_I2C)        += i2c_drv.o
 obj-$(CONFIG_LEGACY_PTYS)	+= pty.o
 obj-$(CONFIG_UNIX98_PTYS)	+= pty.o
 obj-y				+= misc.o
@@ -114,6 +117,9 @@ obj-$(CONFIG_RAMOOPS)		+= ramoops.o
 
 obj-$(CONFIG_JS_RTC)		+= js-rtc.o
 js-rtc-y = rtc.o
+
+obj-$(CONFIG_RALINK_I2S)	+= i2s/
+obj-$(CONFIG_RALINK_PCM)    += pcm/
 
 # Files generated that shall be removed upon make clean
 clean-files := consolemap_deftbl.c defkeymap.c

@@ -20,7 +20,11 @@
 #include <asm/r4kcache.h>
 #include <asm/cacheflush.h>
 
+#if defined CONFIG_MIPS_MT_SMTC
+int vpelimit = 2;
+#else
 int vpelimit;
+#endif
 
 static int __init maxvpes(char *str)
 {
@@ -31,7 +35,12 @@ static int __init maxvpes(char *str)
 
 __setup("maxvpes=", maxvpes);
 
+#if defined CONFIG_MIPS_MT_SMTC
+//int tclimit = 4;
+int tclimit = CONFIG_NR_CPUS;
+#else
 int tclimit;
+#endif
 
 static int __init maxtcs(char *str)
 {
@@ -125,11 +134,19 @@ void mips_mt_regdump(unsigned long mvpctl)
 	local_irq_restore(flags);
 }
 
+static int mt_opt_es;
 static int mt_opt_norps;
 static int mt_opt_rpsctl = -1;
 static int mt_opt_nblsu = -1;
 static int mt_opt_forceconfig7;
 static int mt_opt_config7 = -1;
+
+static int __init es_set(char *str)
+{
+	get_option(&str, &mt_opt_es);
+	return 1;
+}
+__setup("es=", es_set);
 
 static int __init rps_disable(char *s)
 {
@@ -209,6 +226,13 @@ void mips_mt_set_cpuoptions(void)
 	unsigned int oconfig7 = read_c0_config7();
 	unsigned int nconfig7 = oconfig7;
 
+	if (mt_opt_es >= 0) {
+		printk("34K sync es set to %d.\n", mt_opt_es);
+		if (mt_opt_es)
+			nconfig7 |= (1 << 8);
+		else
+			nconfig7 &= ~(1 << 8);
+	}
 	if (mt_opt_norps) {
 		printk("\"norps\" option deprectated: use \"rpsctl=\"\n");
 	}

@@ -154,7 +154,7 @@ static int parse_mount_options(char *data, int op, struct pts_mount_opts *opts)
 			break;
 #endif
 		default:
-			printk(KERN_ERR "devpts: called with bogus options\n");
+			printk("devpts: called with bogus options\n");
 			return -EINVAL;
 		}
 	}

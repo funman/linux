@@ -1,5 +1,21 @@
+#Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 menu "Core Netfilter Configuration"
 	depends on NET && INET && NETFILTER
+
+choice
+        prompt "NAT Types"
+        default NAT_LINUX
+
+        config  NAT_FCONE
+        bool "Full_Cone (EXPERIMENTAL)"
+
+        config  NAT_RCONE
+        bool "Restricted_Cone (EXPERIMENTAL)"
+
+        config  NAT_LINUX
+        bool "Linux"
+
+endchoice
 
 config NETFILTER_NETLINK
 	tristate
@@ -99,6 +115,16 @@ config NF_CT_PROTO_DCCP
 config NF_CT_PROTO_GRE
 	tristate
 
+config NF_CT_PROTO_ESP
+	tristate 'ESP protocol connection tracking support'
+	depends on NF_CONNTRACK
+	default y
+	help
+	  With this option enabled, we can conntrack the esp connection.
+
+	  If you want to compile it as a module, say M here.
+          If unsure, say `Y'.
+
 config NF_CT_PROTO_SCTP
 	tristate 'SCTP protocol connection tracking support (EXPERIMENTAL)'
 	depends on EXPERIMENTAL
@@ -152,7 +178,6 @@ config NF_CONNTRACK_FTP
 
 config NF_CONNTRACK_H323
 	tristate "H.323 protocol support"
-	depends on (IPV6 || IPV6=n)
 	depends on NETFILTER_ADVANCED
 	help
 	  H.323 is a VoIP signalling protocol from ITU-T. As one of the most
@@ -260,6 +285,33 @@ config NF_CONNTRACK_TFTP
 
 	  To compile it as a module, choose M here.  If unsure, say N.
 
+config NF_CONNTRACK_RTSP
+	tristate "RTSP protocol support"
+	depends on NF_CONNTRACK
+	help
+		Support the RTSP protocol.  This allows UDP transports to be setup
+		properly, including RTP and RDT.
+
+		If you want to compile it as a module, say 'M' here and read
+		Documentation/modules.txt.  If unsure, say 'Y'.
+
+config NF_CONNTRACK_ESP
+	tristate "ESP protocol support"
+	depends on NF_CONNTRACK
+	help
+		Support the ESP protocol. This helper allows ESP packet
+		forwarding to be setup properly.
+
+		To compile it as a module, choose M here, If unsure, say N.
+
+config NF_CONNTRACK_MMS
+	tristate "MMS protocol support"
+	depends on NF_CONNTRACK
+	help
+		Support the Microsoft mms protocol. This helper allows mms
+		to be setup properly.
+
+		To compile it as a module, choose M here, If unsure, say N.
 config NF_CT_NETLINK
 	tristate 'Connection tracking netlink interface'
 	select NETFILTER_NETLINK
@@ -499,6 +551,18 @@ config NETFILTER_XT_TARGET_NOTRACK
 	  If you want to compile it as a module, say M here and read
 	  <file:Documentation/kbuild/modules.txt>.  If unsure, say `N'.
 
+config NETFILTER_XT_TARGET_PORT_TRIGGER
+	tristate "Port Trigger suport"
+	depends on NETFILTER_XTABLES
+	depends on NF_CONNTRACK
+	help
+	  Watching TCP or UDP packet with specified direction & port, when the packet
+	  found, according the x_tables (using iptables), it will new a connection 
+          track, allow the new connection pass netfilter. It compile xt_TRIGGER to 
+          kernel.
+	  
+          To compile it as a module, choose M here, If unsure, say N.
+
 config NETFILTER_XT_TARGET_RATEEST
 	tristate '"RATEEST" target support'
 	depends on NETFILTER_ADVANCED
@@ -557,7 +621,6 @@ config NETFILTER_XT_TARGET_SECMARK
 
 config NETFILTER_XT_TARGET_TCPMSS
 	tristate '"TCPMSS" target support'
-	depends on (IPV6 || IPV6=n)
 	default m if NETFILTER_ADVANCED=n
 	---help---
 	  This option adds a `TCPMSS' target, which allows you to alter the
@@ -945,6 +1008,26 @@ config NETFILTER_XT_MATCH_STATE
 	  is a powerful tool for packet classification.
 
 	  To compile it as a module, choose M here.  If unsure, say N.
+
+config NETFILTER_XT_MATCH_LAYER7
+	tristate '"layer7" match support'
+	depends on NETFILTER_XTABLES
+	depends on EXPERIMENTAL && (IP_NF_CONNTRACK || NF_CONNTRACK)
+	help
+	  Say Y if you want to be able to classify connections (and their
+	  packets) based on regular expression matching of their application
+	  layer data.   This is one way to classify applications such as
+	  peer-to-peer filesharing systems that do not always use the same
+	  port.
+
+	  To compile it as a module, choose M here.  If unsure, say N.
+
+config NETFILTER_XT_MATCH_LAYER7_DEBUG
+        bool 'Layer 7 debugging output'
+        depends on NETFILTER_XT_MATCH_LAYER7
+        help
+          Say Y to get lots of debugging output.
+
 
 config NETFILTER_XT_MATCH_STATISTIC
 	tristate '"statistic" match support'

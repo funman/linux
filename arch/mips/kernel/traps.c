@@ -1404,10 +1404,15 @@ static void *set_vi_srs_handler(int n, vi_handler_t addr, int srs)
 
 		memcpy(b, vec_start, handler_len);
 #ifdef CONFIG_MIPS_MT_SMTC
+		if (!cpu_has_veic) 
 		BUG_ON(n > 7);	/* Vector index %d exceeds SMTC maximum. */
 
 		w = (u32 *)(b + mori_offset);
+#ifdef CONFIG_MIPS_TC3262
+		*w = (*w & 0xffff0000) | (n);
+#else
 		*w = (*w & 0xffff0000) | (0x100 << n);
+#endif
 #endif /* CONFIG_MIPS_MT_SMTC */
 		w = (u32 *)(b + lui_offset);
 		*w = (*w & 0xffff0000) | (((u32)handler >> 16) & 0xffff);
@@ -1437,6 +1442,7 @@ void *set_vi_handler(int n, vi_handler_t addr)
 {
 	return set_vi_srs_handler(n, addr, 0);
 }
+EXPORT_SYMBOL(set_vi_handler);
 
 extern void cpu_cache_init(void);
 extern void tlb_init(void);

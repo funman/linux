@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * Definitions and Declarations for tuple.
  *
@@ -24,6 +25,15 @@
 
 #define NF_CT_TUPLE_L3SIZE	ARRAY_SIZE(((union nf_inet_addr *)NULL)->all)
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+/* The l3 protocol-specific manipulable parts of the tuple: always in
+   network order! */
+union nf_conntrack_address {
+	u_int32_t all[NF_CT_TUPLE_L3SIZE];
+	__be32 ip;
+	__be32 ip6[4];
+};
+
 /* The protocol-specific manipulable parts of the tuple: always in
    network order! */
 union nf_conntrack_man_proto {
@@ -48,6 +58,14 @@ union nf_conntrack_man_proto {
 	struct {
 		__be16 key;	/* GRE key is 32bit, PPtP only uses 16bit */
 	} gre;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	// Arthur add
+	struct {
+		__be16 spi;
+	} ah;
+	struct {
+		__be16 spi;
+	} esp;
 };
 
 /* The manipulable part of the tuple. */
@@ -87,6 +105,14 @@ struct nf_conntrack_tuple {
 			struct {
 				__be16 key;
 			} gre;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+			// Arthur add
+			struct {
+				__be16 spi;
+			} ah;
+			struct {
+				__be16 spi;
+			} esp;
 		} u;
 
 		/* The protocol. */
@@ -138,6 +164,13 @@ static inline void nf_ct_dump_tuple(const struct nf_conntrack_tuple *t)
 	}
 }
 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+#define NF_CT_DUMP_TUPLE(tp)						    \
+DEBUGP("tuple %p: %u %u " NIP6_FMT " %hu -> " NIP6_FMT " %hu\n",	    \
+	(tp), (tp)->src.l3num, (tp)->dst.protonum,			    \
+	NIP6(*(struct in6_addr *)(tp)->src.u3.all), ntohs((tp)->src.u.all), \
+	NIP6(*(struct in6_addr *)(tp)->dst.u3.all), ntohs((tp)->dst.u.all))
+	
 /* If we're the first tuple, it's the original dir. */
 #define NF_CT_DIRECTION(h)						\
 	((enum ip_conntrack_dir)(h)->tuple.dst.dir)
@@ -153,6 +186,10 @@ struct nf_conntrack_tuple_hash {
 static inline bool __nf_ct_tuple_src_equal(const struct nf_conntrack_tuple *t1,
 					   const struct nf_conntrack_tuple *t2)
 { 
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+       if (t1->dst.protonum == 50 && t1->src.u3.ip == t2->src.u3.ip) {
+	       return (t1->src.u.esp.spi == t2->src.u.esp.spi);
+       }
 	return (nf_inet_addr_cmp(&t1->src.u3, &t2->src.u3) &&
 		t1->src.u.all == t2->src.u.all &&
 		t1->src.l3num == t2->src.l3num);
@@ -161,6 +198,10 @@ static inline bool __nf_ct_tuple_src_equal(const struct nf_conntrack_tuple *t1,
 static inline bool __nf_ct_tuple_dst_equal(const struct nf_conntrack_tuple *t1,
 					   const struct nf_conntrack_tuple *t2)
 {
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+	if (t2->dst.protonum == 50 && t1->dst.u3.ip == t2->dst.u3.ip) {
+		return (t1->dst.u.esp.spi == t2->dst.u.esp.spi);
+	}
 	return (nf_inet_addr_cmp(&t1->dst.u3, &t2->dst.u3) &&
 		t1->dst.u.all == t2->dst.u.all &&
 		t1->dst.protonum == t2->dst.protonum);
@@ -172,6 +213,20 @@ static inline bool nf_ct_tuple_equal(const struct nf_conntrack_tuple *t1,
 	return __nf_ct_tuple_src_equal(t1, t2) &&
 	       __nf_ct_tuple_dst_equal(t1, t2);
 }
+
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+static inline int nf_ct_cone_tuple_equal(const struct nf_conntrack_tuple *t1,
+					 const struct nf_conntrack_tuple *t2)
+{
+#if defined (CONFIG_NAT_FCONE)    /* Full Cone */
+        return __nf_ct_tuple_dst_equal(t1, t2);
+#elif defined (CONFIG_NAT_RCONE)  /* Restricted Cone */
+        return (__nf_ct_tuple_dst_equal(t1, t2) &&
+		nf_inet_addr_cmp(&t1->src.u3, &t2->src.u3)  &&
+                t1->src.l3num == t2->src.l3num);
+#endif
+}
+#endif
 
 static inline bool
 nf_ct_tuple_mask_equal(const struct nf_conntrack_tuple_mask *m1,

@@ -1,3 +1,4 @@
+//Oct 29, 2012--Modifications were made by U-Media Communication, inc.
 /*
  *	Generic parts
  *	Linux ethernet bridge
@@ -22,6 +23,45 @@
 
 #include "br_private.h"
 
+/* Compute checksum for count bytes starting at addr, using one's complement of one's complement sum*/
+unsigned short br_compute_ip_checksum(unsigned short *addr, unsigned int count)
+{  
+	register unsigned long sum = 0;  
+	while (count > 1) {    
+		sum += * addr++;    
+		count -= 2;  
+	}  
+	//if any bytes left, pad the bytes and add  
+	if(count > 0) {    
+		sum += ((*addr)&htons(0xFF00));  
+	}  
+	//Fold sum to 16 bits: add carrier to result  
+	while (sum>>16) {      
+		sum = (sum & 0xffff) + (sum >> 16);  
+	}  //one's complement  
+	sum = ~sum;  
+	return ((unsigned short)sum);
+}
+
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//+++Ricky Cao: Below is added for support predefined url
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+#include "br_umedia_predefine_url.h"
+#endif
+//---Ricky Cao: Above is added for support predefined url
+
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+extern unsigned char deny_manage_by_wlan;
+#endif
+//Ricky Cao added DONE
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+#include "br_umedia_redirect_url.h"
+#endif
+
 int (*br_should_route_hook)(struct sk_buff *skb);
 
 static const struct stp_proto br_stp_proto = {
@@ -41,6 +81,25 @@ static int __init br_init(void)
 		pr_err("bridge: can't register sap for STP\n");
 		return err;
 	}
+
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//+++Ricky Cao: Below is added for support predefined url
+#if defined(CONFIG_BRIDGE_UMEDIA_PREDEFINED_URL)
+	br_init_predefined_url();
+#endif
+//---Ricky Cao: Above is added for support predefined url
+
+//Ricky Cao: added for control if allow manage device by GUI via wireless
+#if defined(CONFIG_BRIDGE_UMEDIA_WLAN_MANAGE)
+	deny_manage_by_wlan = 0;
+#endif
+//Ricky Cao added DONE
+
+//support redirect url to configuration web, tim.wang@u-media.com.tw, 2012-12-14
+#if defined(CONFIG_BRIDGE_UMEDIA_REDIRECT_URL)
+	br_init_rdu_localUrl();
+#endif
+
 
 	err = br_fdb_init();
 	if (err)

@@ -1,3 +1,4 @@
+//Jun 12, 2012--Modifications were made by U-Media Communication, inc.
 /*
  * Connection state tracking for netfilter.  This is separated from,
  * but required by, the (future) NAT layer; it can also be used by an iptables
@@ -26,6 +27,10 @@
 #include <net/netfilter/ipv6/nf_conntrack_icmpv6.h>
 
 #include <net/netfilter/nf_conntrack_tuple.h>
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+//june.chen, 2012-01-05, add for IPSec Passthrough
+#include <linux/netfilter/nf_conntrack_proto_esp.h>
+//june.chen end
 
 /* per conntrack: protocol private data */
 union nf_conntrack_proto {
@@ -34,6 +39,10 @@ union nf_conntrack_proto {
 	struct ip_ct_sctp sctp;
 	struct ip_ct_tcp tcp;
 	struct nf_ct_gre gre;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	//june.chen, 2012-01-05, add for IPSec Passthrough
+	struct nf_ct_esp esp;
+	//june.chen end
 };
 
 union nf_conntrack_expect_proto {
@@ -46,6 +55,8 @@ union nf_conntrack_expect_proto {
 #include <linux/netfilter/nf_conntrack_h323.h>
 #include <linux/netfilter/nf_conntrack_sane.h>
 #include <linux/netfilter/nf_conntrack_sip.h>
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]
+#include <linux/netfilter/nf_conntrack_esp.h>
 
 /* per conntrack: application helper private data */
 union nf_conntrack_help {
@@ -55,6 +66,8 @@ union nf_conntrack_help {
 	struct nf_ct_h323_master ct_h323_info;
 	struct nf_ct_sane_master ct_sane_info;
 	struct nf_ct_sip_master ct_sip_info;
+//2012-06-12, David Lin, [Merge from linux-2.6.21 of SDK3.6.0.0]	
+	struct nf_ct_esp_master ct_esp_info;
 };
 
 #include <linux/types.h>
@@ -114,6 +127,22 @@ struct nf_conn {
 
 #ifdef CONFIG_NF_CONNTRACK_SECMARK
 	u_int32_t secmark;
+#endif
+
+#if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || \
+    defined(CONFIG_NETFILTER_XT_MATCH_LAYER7_MODULE)
+	struct {
+		/*
+		 * e.g. "http". NULL before decision. "unknown" after decision
+		 * if no match.
+		 */
+		char *app_proto;
+		/*
+		 * application layer data so far. NULL after match decision.
+		 */
+		char *app_data;
+		unsigned int app_data_len;
+	} layer7;
 #endif
 
 	/* Storage reserved for other modules: */

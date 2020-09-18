@@ -1,3 +1,4 @@
+//Oct 7, 2012--Modifications were made by U-Media Communication, inc.
 #include <linux/init.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
@@ -8,6 +9,8 @@
 #include <linux/dirent.h>
 #include <linux/syscalls.h>
 #include <linux/utime.h>
+
+#include "../include/linux/autoconf.h"
 
 static __initdata char *message;
 static void __init error(char *x)

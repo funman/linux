@@ -131,6 +131,8 @@ obj-$(CONFIG_BOOKE_WDT) += booke_wdt.o
 # PPC64 Architecture
 obj-$(CONFIG_WATCHDOG_RTAS) += wdrtas.o
 
+obj-$(CONFIG_RALINK_WATCHDOG) += ralink_wdt.o
+
 # S390 Architecture
 
 # SUPERH (sh + sh64) Architecture

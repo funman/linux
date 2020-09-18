@@ -42,6 +42,9 @@
 #include <asm/addrspace.h>
 #include <asm/smtc.h>
 #include <asm/smtc_proc.h>
+#ifdef CONFIG_MIPS_TC3262
+#include <asm/tc3162/tc3162.h>
+#endif
 
 /*
  * SMTC Kernel needs to manipulate low-level CPU interrupt mask
@@ -100,7 +103,11 @@ unsigned int smtc_status;
 
 /* Boot command line configuration overrides */
 
+#if defined CONFIG_MIPS_MT_SMTC
+static int vpe0limit = CONFIG_NR_CPUS - 1;
+#else
 static int vpe0limit;
+#endif
 static int ipibuffers;
 static int nostlb;
 static int asidmask;
@@ -469,6 +476,12 @@ void smtc_prepare_cpus(int cpus)
 	for (tc = 0, vpe = 0 ; (vpe < nvpe) && (tc < ntc) ; vpe++) {
 		if (tcpervpe[vpe] == 0)
 			continue;
+		/*
+		 * Set the MVP bits.
+		 */
+		settc(tc);
+		write_vpe_c0_vpeconf0(read_vpe_c0_vpeconf0() | VPECONF0_MVP);
+
 		if (vpe != 0)
 			printk(", ");
 		printk("VPE %d: TC", vpe);
@@ -501,10 +514,18 @@ void smtc_prepare_cpus(int cpus)
 			 * Clear ERL/EXL of VPEs other than 0
 			 * and set restricted interrupt enable/mask.
 			 */
+		#ifdef CONFIG_MIPS_TC3262
+			write_vpe_c0_status((read_vpe_c0_status()
+				& ~(ST0_BEV | ST0_ERL | ST0_EXL | ST0_IM))
+				| (STATUSF_IP0 | STATUSF_IP1 | STATUSF_IP2 | STATUSF_IP3 
+				| STATUSF_IP4 | STATUSF_IP5 | STATUSF_IP6 | STATUSF_IP7 
+				| ST0_IE));
+		#else
 			write_vpe_c0_status((read_vpe_c0_status()
 				& ~(ST0_BEV | ST0_ERL | ST0_EXL | ST0_IM))
 				| (STATUSF_IP0 | STATUSF_IP1 | STATUSF_IP7
 				| ST0_IE));
+		#endif
 			/*
 			 * set config to be the same as vpe0,
 			 *  particularly kseg0 coherency alg
@@ -945,7 +966,11 @@ static void __irq_entry smtc_clock_tick_interrupt(void)
 {
 	unsigned int cpu = smp_processor_id();
 	struct clock_event_device *cd;
+#ifdef CONFIG_MIPS_TC3262
+	int irq = SI_TIMER_INT;
+#else
 	int irq = MIPS_CPU_IRQ_BASE + 1;
+#endif
 
 	irq_enter();
 	kstat_incr_irqs_this_cpu(irq, irq_to_desc(irq));
@@ -1049,7 +1074,11 @@ void deferred_smtc_ipi(void)
  * interrupts.
  */
 
+#ifdef CONFIG_MIPS_TC3262
+static int cpu_ipi_irq = SI_SWINT_INT1;
+#else
 static int cpu_ipi_irq = MIPS_CPU_IRQ_BASE + MIPS_CPU_IPI_IRQ;
+#endif
 
 static irqreturn_t ipi_interrupt(int irq, void *dev_idm)
 {
@@ -1135,6 +1164,8 @@ static struct irqaction irq_ipi = {
 	.name		= "SMTC_IPI"
 };
 
+extern void tc3162_enable_irq(unsigned int irq);
+
 static void setup_cross_vpe_interrupts(unsigned int nvpe)
 {
 	if (nvpe < 1)
@@ -1143,7 +1174,13 @@ static void setup_cross_vpe_interrupts(unsigned int nvpe)
 	if (!cpu_has_vint)
 		panic("SMTC Kernel requires Vectored Interrupt support");
 
+#ifdef CONFIG_MIPS_TC3262
+	set_vi_handler(SI_SWINT_INT1, ipi_irq_dispatch);
+
+	tc3162_enable_irq(SI_SWINT1_INT1);
+#else
 	set_vi_handler(MIPS_CPU_IPI_IRQ, ipi_irq_dispatch);
+#endif
 
 	setup_irq_smtc(cpu_ipi_irq, &irq_ipi, (0x100 << MIPS_CPU_IPI_IRQ));
 
